@@ -2,57 +2,62 @@
 
 /**
  * binary_tree_is_complete - checks if a binary tree is complete
- * @tree: a pointer to the root node of the tree to check
+ * @tree: pointer to the root node of the tree to check
  *
- * Return: 1 if the tree is complete
- *         0 if the tree is not complete
- *         0 if tree is NULL
+ * Return: 1 if the tree is complete, 0 otherwise
  */
 int binary_tree_is_complete(const binary_tree_t *tree)
 {
-	size_t size;
+	binary_tree_t **queue = NULL;
+	size_t front = 0, back = 0, size = 0;
+	int complete = 1, has_missing = 0;
 
-	if (!tree)
-		return (0);
-	size = binary_tree_size(tree);
-
-	return (btic_helper(tree, 0, size));
-}
-
-/**
- * btic_helper - checks if a binary tree is complete
- * @tree: a pointer to the root node of the tree to check
- * @index: node index to check
- * @size: number of nodes in the tree
- *
- * Return: 1 if the tree is complete
- *         0 if the tree is not complete
- *         0 if tree is NULL
- */
-int btic_helper(const binary_tree_t *tree, size_t index, size_t size)
-{
-	if (!tree)
-		return (1);
-
-	if (index >= size)
+	if (tree == NULL)
 		return (0);
 
-	return (btic_helper(tree->left, 2 * index + 1, size) &&
-		btic_helper(tree->right, 2 * index + 2, size));
-}
-
-/**
- * binary_tree_size - measures the size of a binary tree
- * @tree: tree to measure the size of
- *
- * Return: size of the tree
- *         0 if tree is NULL
- */
-size_t binary_tree_size(const binary_tree_t *tree)
-{
-	if (!tree)
+	queue = malloc(sizeof(binary_tree_t *) * 1024);
+	if (queue == NULL)
 		return (0);
 
-	return (binary_tree_size(tree->left) +
-		binary_tree_size(tree->right) + 1);
+	queue[back++] = (binary_tree_t *)tree;
+	size++;
+
+	while (front < size)
+	{
+		binary_tree_t *node = queue[front++];
+
+		if (node->left != NULL)
+		{
+			if (has_missing)
+			{
+				complete = 0;
+				break;
+			}
+			queue[back++] = node->left;
+			size++;
+		}
+		else
+		{
+			has_missing = 1;
+		}
+
+		if (node->right != NULL)
+		{
+			if (has_missing)
+			{
+				complete = 0;
+				break;
+			}
+			queue[back++] = node->right;
+			size++;
+		}
+		else
+		{
+			has_missing = 1;
+		}
+	}
+
+	free(queue);
+
+	return (complete);
 }
